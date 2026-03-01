@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-white/40 backdrop-blur-2xl border border-white/60 shadow-xl rounded-2xl;
+  }
+
+  .dark .glass-panel {
+    @apply bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.08)] shadow-[0_8px_32px_0_rgba(0,0,0,0.37)];
+  }
+}
+
+body {
+  @apply bg-[#F8FAFC] text-slate-900 min-h-screen antialiased transition-colors duration-500;
+}
+
+.dark body {
+  @apply bg-[#0A0A0A] text-slate-200;
+  background-image: radial-gradient(circle at top left, #7C2D12 0%, transparent 40%), 
+                    radial-gradient(circle at bottom right, #431407 0%, transparent 40%);
+}
