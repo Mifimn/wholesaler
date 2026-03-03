@@ -3,6 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, X, Send } from 'lucide-react';
 
 export default function InquiryBasket({ items, onRemove }) {
+  // Calculate total units (including decimals like 0.5)
+  const totalUnits = items.reduce((acc, item) => acc + Number(item.quantity || 0), 0);
+
   return (
     <div className="fixed right-2 sm:right-6 top-1/2 -translate-y-1/2 z-[70] pointer-events-none perspective-[1200px]">
       <motion.div 
@@ -10,42 +13,22 @@ export default function InquiryBasket({ items, onRemove }) {
         animate={{ 
           x: 0, 
           opacity: 1, 
-          rotateY: -25, // High-tilt 3D perspective
-          transition: { 
-            type: 'spring', 
-            stiffness: 80, 
-            damping: 15,
-            delay: 0.2
-          }
+          rotateY: -25, 
+          transition: { type: 'spring', stiffness: 80, damping: 15, delay: 0.2 }
         }}
-        whileHover={{ rotateY: -10, x: -5 }} // Interactive feedback
+        whileHover={{ rotateY: -10, x: -5 }}
         className="
-          relative
-          pointer-events-auto 
-          bg-white/90 dark:bg-[#0a0a0a]/90 
-          backdrop-blur-2xl 
-          border border-slate-200/50 dark:border-[#ff7d1a]/30 
-          shadow-[20px_20px_50px_rgba(0,0,0,0.3)]
-          flex flex-col items-center 
-          rounded-l-[28px] rounded-r-md
-          
-          /* Phone View Reductions */
-          w-[52px] sm:w-[85px]
-          p-2 sm:p-4 
-          gap-3 sm:gap-5
+          relative pointer-events-auto bg-white/90 dark:bg-[#0a0a0a]/90 
+          backdrop-blur-2xl border border-slate-200/50 dark:border-[#ff7d1a]/30 
+          shadow-[20px_20px_50px_rgba(0,0,0,0.3)] flex flex-col items-center 
+          rounded-l-[28px] rounded-r-md w-[52px] sm:w-[85px] p-2 sm:p-4 gap-3 sm:gap-5
         "
-        style={{ 
-          transformStyle: 'preserve-3d',
-          transformOrigin: 'right center'
-        }}
+        style={{ transformStyle: 'preserve-3d', transformOrigin: 'right center' }}
       >
-        {/* --- 3D FLOATING EDGE (Thickness) --- */}
+        {/* --- 3D FLOATING EDGE --- */}
         <div 
           className="absolute top-0 right-0 w-[6px] h-full bg-slate-200 dark:bg-orange-600/40 rounded-r-md" 
-          style={{ 
-            transform: 'rotateY(90deg) translateZ(3px)',
-            transformOrigin: 'right'
-          }}
+          style={{ transform: 'rotateY(90deg) translateZ(3px)', transformOrigin: 'right' }}
         />
 
         {/* --- INNER GLOW --- */}
@@ -60,13 +43,15 @@ export default function InquiryBasket({ items, onRemove }) {
             <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2.5} />
           </motion.div>
           
-          {items.length > 0 && (
+          {/* Updated Badge: Displays decimal totals */}
+          {totalUnits > 0 && (
             <motion.span 
+              key={totalUnits}
               initial={{ scale: 0, y: 10 }}
               animate={{ scale: 1, y: 0 }}
-              className="absolute -top-2 -right-2 bg-black text-white text-[9px] sm:text-[10px] font-black w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full border-2 border-[#ff7d1a]"
+              className="absolute -top-2 -right-2 bg-black text-white text-[8px] sm:text-[10px] font-black w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full border-2 border-[#ff7d1a]"
             >
-              {items.length}
+              {totalUnits}
             </motion.span>
           )}
         </div>
@@ -83,8 +68,17 @@ export default function InquiryBasket({ items, onRemove }) {
                 exit={{ opacity: 0, scale: 0.5, x: 20 }}
                 className="relative group/item"
               >
-                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden bg-white shadow-sm flex items-center justify-center">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden bg-white shadow-sm flex items-center justify-center relative">
                   <img src={item.img} alt="" className="w-full h-full object-contain p-1" />
+                  
+                  {/* Fractional Indicator: Visual cue for 0.5 units */}
+                  {item.quantity % 1 !== 0 && (
+                    <div className="absolute inset-0 bg-[#ff7d1a]/10 flex items-center justify-center">
+                      <div className="bg-white/90 dark:bg-black/90 px-1 rounded-[2px] border border-[#ff7d1a]/20 shadow-sm">
+                        <span className="text-[7px] sm:text-[8px] font-black text-[#ff7d1a]">.5</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <button 
                   onClick={() => onRemove(item.id)}
@@ -101,22 +95,13 @@ export default function InquiryBasket({ items, onRemove }) {
         <motion.button 
           whileHover={{ y: -2, backgroundColor: '#ff7d1a', color: '#fff' }}
           whileTap={{ scale: 0.9 }}
-          className="
-            p-2 sm:p-3 
-            bg-slate-100 dark:bg-white/5 
-            rounded-lg sm:rounded-2xl 
-            text-[#ff7d1a] 
-            transition-all 
-            shadow-inner
-          "
+          className="p-2 sm:p-3 bg-slate-100 dark:bg-white/5 rounded-lg sm:rounded-2xl text-[#ff7d1a] transition-all shadow-inner"
         >
           <Send className="w-4 h-4 sm:w-5 sm:h-5" />
         </motion.button>
 
-        {/* Bottom Status Indicator (3D Detail) */}
         <div className="w-1 h-4 bg-orange-500/20 rounded-full blur-[1px]" />
       </motion.div>
     </div>
   );
 }
-

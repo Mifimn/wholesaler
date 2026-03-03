@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Menu, X, Search, ShoppingBag, User, 
   ChevronRight, Home, Grid, Sun, Moon, 
-  Lock, Truck 
+  Lock, Truck, LogIn, UserPlus 
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useThemeStore } from '../../store/useThemeStore';
@@ -60,6 +60,11 @@ export default function BrandHeader() {
               </Link>
             </div>
 
+            {/* Desktop Auth Link */}
+            <Link to="/login" className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-[#ff7d1a]/5 rounded-lg text-[9px] font-black uppercase tracking-widest text-[#ff7d1a] hover:bg-[#ff7d1a] hover:text-white transition-all">
+              <User size={12} /> Sign In
+            </Link>
+
             <button onClick={toggleTheme} className="p-2 text-slate-400 hover:text-[#ff7d1a] transition-all bg-slate-100 dark:bg-white/5 rounded-lg active:scale-90">
               {isDark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
@@ -104,6 +109,18 @@ export default function BrandHeader() {
             <div className="flex-1 overflow-y-auto p-6">
               {!showCategories ? (
                 <div className="space-y-3">
+                  {/* Auth Quick Access (Mobile) */}
+                  <div className="grid grid-cols-2 gap-3 mb-6">
+                    <Link to="/login" onClick={() => setIsMenuOpen(false)} className="flex items-center justify-center gap-2 p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-transparent active:border-[#ff7d1a]/30 transition-all">
+                      <LogIn size={16} className="text-[#ff7d1a]" />
+                      <span className="text-[10px] font-black uppercase dark:text-white">Login</span>
+                    </Link>
+                    <Link to="/signup" onClick={() => setIsMenuOpen(false)} className="flex items-center justify-center gap-2 p-4 bg-[#ff7d1a] rounded-2xl shadow-glow-orange active:scale-95 transition-all">
+                      <UserPlus size={16} className="text-white" />
+                      <span className="text-[10px] font-black uppercase text-white tracking-widest">Join</span>
+                    </Link>
+                  </div>
+
                   {[
                     { name: 'Home', icon: Home, path: '/' },
                     { name: 'Categories', icon: Grid, action: () => setShowCategories(true) },

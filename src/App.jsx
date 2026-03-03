@@ -13,6 +13,8 @@ import Dashboard from './pages/Dashboard';
 import CartDrawer from './components/Showroom/CartDrawer';
 import InquiryBasket from './components/Showroom/InquiryBasket';
 import ModalController from './components/Global/ModalController';
+import Login from './pages/Auth/Login';
+import Signup from './pages/Auth/Signup';
 
 // Admin Pages
 import InventoryManager from './pages/Admin/Inventory';
@@ -69,6 +71,8 @@ const ContentWrapper = () => {
       <Route path="/product/:id" element={<ProductDetails isLoading={isLoading} onAddInquiry={addToBasket} />} />
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/profile" element={<Dashboard />} />
+      <Route path="/login" element={<Login />} />
+<Route path="/signup" element={<Signup />} />
 
       {/* Admin Routes */}
       <Route path="/admin/inventory" element={<InventoryManager />} />
