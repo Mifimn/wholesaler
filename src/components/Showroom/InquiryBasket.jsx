@@ -4,41 +4,91 @@ import { ShoppingBag, X, Send } from 'lucide-react';
 
 export default function InquiryBasket({ items, onRemove }) {
   return (
-    <div className="fixed right-6 top-1/2 -translate-y-1/2 z-[70] pointer-events-none">
+    <div className="fixed right-2 sm:right-6 top-1/2 -translate-y-1/2 z-[70] pointer-events-none perspective-[1200px]">
       <motion.div 
-        initial={{ x: 100, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        className="pointer-events-auto bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-xl border border-slate-200 dark:border-[#ff7d1a]/30 p-4 rounded-[32px] shadow-2xl flex flex-col items-center gap-4 min-w-[80px]"
+        initial={{ x: 100, opacity: 0, rotateY: 0 }}
+        animate={{ 
+          x: 0, 
+          opacity: 1, 
+          rotateY: -25, // High-tilt 3D perspective
+          transition: { 
+            type: 'spring', 
+            stiffness: 80, 
+            damping: 15,
+            delay: 0.2
+          }
+        }}
+        whileHover={{ rotateY: -10, x: -5 }} // Interactive feedback
+        className="
+          relative
+          pointer-events-auto 
+          bg-white/90 dark:bg-[#0a0a0a]/90 
+          backdrop-blur-2xl 
+          border border-slate-200/50 dark:border-[#ff7d1a]/30 
+          shadow-[20px_20px_50px_rgba(0,0,0,0.3)]
+          flex flex-col items-center 
+          rounded-l-[28px] rounded-r-md
+          
+          /* Phone View Reductions */
+          w-[52px] sm:w-[85px]
+          p-2 sm:p-4 
+          gap-3 sm:gap-5
+        "
+        style={{ 
+          transformStyle: 'preserve-3d',
+          transformOrigin: 'right center'
+        }}
       >
+        {/* --- 3D FLOATING EDGE (Thickness) --- */}
+        <div 
+          className="absolute top-0 right-0 w-[6px] h-full bg-slate-200 dark:bg-orange-600/40 rounded-r-md" 
+          style={{ 
+            transform: 'rotateY(90deg) translateZ(3px)',
+            transformOrigin: 'right'
+          }}
+        />
+
+        {/* --- INNER GLOW --- */}
+        <div className="absolute inset-0 rounded-l-[28px] border-r-4 border-[#ff7d1a]/10 pointer-events-none" />
+
         {/* Basket Header */}
-        <div className="relative">
-          <div className="p-3 bg-[#ff7d1a] rounded-2xl text-white shadow-[0_0_20px_rgba(255,125,26,0.4)]">
-            <ShoppingBag size={24} />
-          </div>
+        <div className="relative group">
+          <motion.div 
+            whileTap={{ scale: 0.9 }}
+            className="p-2 sm:p-3 bg-[#ff7d1a] rounded-xl sm:rounded-2xl text-white shadow-[0_8px_20px_rgba(255,125,26,0.4)]"
+          >
+            <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2.5} />
+          </motion.div>
+          
           {items.length > 0 && (
-            <span className="absolute -top-2 -right-2 bg-black text-white text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full border-2 border-[#ff7d1a]">
+            <motion.span 
+              initial={{ scale: 0, y: 10 }}
+              animate={{ scale: 1, y: 0 }}
+              className="absolute -top-2 -right-2 bg-black text-white text-[9px] sm:text-[10px] font-black w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full border-2 border-[#ff7d1a]"
+            >
               {items.length}
-            </span>
+            </motion.span>
           )}
         </div>
 
         {/* Item Preview List */}
-        <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto no-scrollbar">
-          <AnimatePresence>
+        <div className="flex flex-col gap-2 max-h-[200px] sm:max-h-[350px] overflow-y-auto no-scrollbar py-1">
+          <AnimatePresence mode="popLayout">
             {items.map((item) => (
               <motion.div
                 key={item.id}
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0 }}
-                className="relative group"
+                layout
+                initial={{ opacity: 0, scale: 0.5, x: 20 }}
+                animate={{ opacity: 1, scale: 1, x: 0 }}
+                exit={{ opacity: 0, scale: 0.5, x: 20 }}
+                className="relative group/item"
               >
-                <div className="w-12 h-12 rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden bg-white">
-                  <img src={item.img} alt="" className="w-full h-full object-contain" />
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden bg-white shadow-sm flex items-center justify-center">
+                  <img src={item.img} alt="" className="w-full h-full object-contain p-1" />
                 </div>
                 <button 
                   onClick={() => onRemove(item.id)}
-                  className="absolute -top-1 -right-1 bg-red-500 text-white p-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute -top-1 -right-1 bg-red-500 text-white p-0.5 rounded-full opacity-0 group-hover/item:opacity-100 transition-opacity z-20"
                 >
                   <X size={10} />
                 </button>
@@ -48,10 +98,25 @@ export default function InquiryBasket({ items, onRemove }) {
         </div>
 
         {/* Action Button */}
-        <button className="p-3 bg-slate-100 dark:bg-white/5 rounded-2xl text-[#ff7d1a] hover:bg-[#ff7d1a] hover:text-white transition-all shadow-inner">
-          <Send size={20} />
-        </button>
+        <motion.button 
+          whileHover={{ y: -2, backgroundColor: '#ff7d1a', color: '#fff' }}
+          whileTap={{ scale: 0.9 }}
+          className="
+            p-2 sm:p-3 
+            bg-slate-100 dark:bg-white/5 
+            rounded-lg sm:rounded-2xl 
+            text-[#ff7d1a] 
+            transition-all 
+            shadow-inner
+          "
+        >
+          <Send className="w-4 h-4 sm:w-5 sm:h-5" />
+        </motion.button>
+
+        {/* Bottom Status Indicator (3D Detail) */}
+        <div className="w-1 h-4 bg-orange-500/20 rounded-full blur-[1px]" />
       </motion.div>
     </div>
   );
 }
+
