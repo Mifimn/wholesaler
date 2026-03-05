@@ -1,5 +1,5 @@
 export default async function handler(req, res) {
-  // Security: Only allow POST requests
+  // Only allow POST requests from your uploader
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     formData.append('image_url', image);
     formData.append('size', 'auto');
 
-    // Step 2 uses this to apply the white background
+    // Step 2 adds the white background
     if (bg_color) {
       formData.append('bg_color', bg_color);
     }
@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     const response = await fetch('https://api.remove.bg/v1.0/removebg', {
       method: 'POST',
       headers: {
-        'X-Api-Key': process.env.REMOVE_BG_API_KEY, // Set this in Vercel Dashboard
+        'X-Api-Key': process.env.REMOVE_BG_API_KEY, // Set this in Vercel Settings -> Environment Variables
       },
       body: formData,
     });
@@ -39,6 +39,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'AI processing failed', details: errorData });
     }
   } catch (error) {
+    console.error("Server Error:", error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
