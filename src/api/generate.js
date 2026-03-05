@@ -1,47 +1,44 @@
 export default async function handler(req, res) {
-  // 1. Security Check: Only allow POST requests
+  // Security: Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { image, surface } = req.body;
+  const { image, bg_color } = req.body;
 
-  // 2. Data Validation
   if (!image) {
     return res.status(400).json({ error: 'Source image is required' });
   }
 
   try {
-    // 3. Connect to Claid.ai API
-    const response = await fetch('https://api.claid.ai/v1/process', {
+    const formData = new FormData();
+    formData.append('image_url', image);
+    formData.append('size', 'auto');
+
+    // Step 2 uses this to apply the white background
+    if (bg_color) {
+      formData.append('bg_color', bg_color);
+    }
+
+    const response = await fetch('https://api.remove.bg/v1.0/removebg', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.CLAID_API_KEY}`,
-        'Content-Type': 'application/json'
+        'X-Api-Key': process.env.REMOVE_BG_API_KEY, // Set this in Vercel Dashboard
       },
-      body: JSON.stringify({
-        input: image,
-        operations: {
-          background: { remove: true }, // Removes original snap
-          scene: { 
-            model: "v2", 
-            prompt: `Product sitting on a professional ${surface} surface, soft studio lighting, realistic contact shadows, 4k resolution` 
-          } // Generates the environment stage
-        }
-      })
+      body: formData,
     });
 
-    const data = await response.json();
+    if (response.ok) {
+      const blob = await response.blob();
+      const buffer = Buffer.from(await blob.arrayBuffer());
+      const base64Image = `data:image/png;base64,${buffer.toString('base64')}`;
 
-    // 4. Return the AI-generated image URL
-    if (data.output?.url) {
-      return res.status(200).json({ url: data.output.url });
+      return res.status(200).json({ url: base64Image });
     } else {
-      console.error("Claid Error Response:", data);
-      return res.status(400).json({ error: 'AI Synthesis failed', details: data });
+      const errorData = await response.json();
+      return res.status(400).json({ error: 'AI processing failed', details: errorData });
     }
   } catch (error) {
-    console.error("Server Error:", error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
