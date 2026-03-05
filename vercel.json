@@ -1,6 +1,11 @@
 {
   "version": 2,
   "installCommand": "npm install --legacy-peer-deps",
+  "build": {
+    "env": {
+      "ENABLE_VC_SPAWN_ISOLATION": "1"
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
